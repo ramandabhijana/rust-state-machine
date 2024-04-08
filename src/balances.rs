@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 /// Balances module
 /// Keeps track of how much balance each account has in this state machine
 /// NOT how pallet storage works in Polkadot SDK just a simple emulation of the behaviours
+#[derive(Debug)]
 pub struct Pallet {
 	// A simple storage mapping from accounts (`String`) to their balances (`u128`).
 	balances: BTreeMap<String, u128>,
