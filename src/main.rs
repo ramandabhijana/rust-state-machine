@@ -16,5 +16,23 @@ impl Runtime {
 }
 
 fn main() {
-	println!("Hello, world!");
+	let mut runtime = Runtime::new();
+
+	let alice = "alice";
+	let bob = "bob";
+	let charlie = "charlie";
+
+	runtime.balances.set_balance(alice, 100);
+
+	// start emulating a block
+	runtime.system.inc_block_number();
+	assert_eq!(runtime.system.block_number(), 1, "Mismatch block number");
+
+	// first transaction
+	runtime.system.inc_nonce(alice);
+	let _res = runtime.balances.transfer(alice, bob, 30).map_err(|e| eprintln!("{}", e));
+
+	// second transaction
+	runtime.system.inc_nonce(alice);
+	let _res = runtime.balances.transfer(alice, charlie, 20).map_err(|e| eprintln!("{}", e));
 }
