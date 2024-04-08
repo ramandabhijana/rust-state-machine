@@ -1,0 +1,1 @@
+Check out this [awesome course](https://dotcodeschool.com/courses/rust-state-machine) 📚
