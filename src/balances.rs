@@ -1,12 +1,15 @@
 use std::collections::BTreeMap;
 
+type AccountId = String;
+type Balance = u128;
+
 /// Balances module
 /// Keeps track of how much balance each account has in this state machine
 /// NOT how pallet storage works in Polkadot SDK just a simple emulation of the behaviours
 #[derive(Debug)]
 pub struct Pallet {
 	// A simple storage mapping from accounts (`String`) to their balances (`u128`).
-	balances: BTreeMap<String, u128>,
+	balances: BTreeMap<AccountId, Balance>,
 }
 
 impl Pallet {
@@ -16,20 +19,25 @@ impl Pallet {
 	}
 
 	/// Set the balance of an account `who` to some `amount`.
-	pub fn set_balance(&mut self, who: &str, amount: u128) {
-		self.balances.insert(who.to_string(), amount);
+	pub fn set_balance(&mut self, who: &AccountId, amount: Balance) {
+		self.balances.insert(who.clone(), amount);
 	}
 
 	/// Get the balance of an account `who`.
 	/// If the account has no stored balance, we return zero.
-	pub fn balance(&self, who: &str) -> u128 {
+	pub fn balance(&self, who: &AccountId) -> Balance {
 		*self.balances.get(who).unwrap_or(&0)
 	}
 
 	/// Transfer `amount` from one account to another.
 	/// This function verifies that `from` has at least `amount` balance to transfer,
 	/// and that no mathematical overflows occur.
-	pub fn transfer(&mut self, caller: &str, to: &str, amount: u128) -> Result<(), &'static str> {
+	pub fn transfer(
+		&mut self,
+		caller: &AccountId,
+		to: &AccountId,
+		amount: Balance,
+	) -> Result<(), &'static str> {
 		let caller_balance = self.balance(caller);
 		let to_balance = self.balance(to);
 

@@ -19,23 +19,23 @@ impl Runtime {
 fn main() {
 	let mut runtime = Runtime::new();
 
-	let alice = "alice";
-	let bob = "bob";
-	let charlie = "charlie";
+	let alice = String::from("alice");
+	let bob = String::from("bob");
+	let charlie = String::from("charlie");
 
-	runtime.balances.set_balance(alice, 100);
+	runtime.balances.set_balance(&alice, 100);
 
 	// start emulating a block
 	runtime.system.inc_block_number();
 	assert_eq!(runtime.system.block_number(), 1, "Mismatch block number");
 
 	// first transaction
-	runtime.system.inc_nonce(alice);
-	let _res = runtime.balances.transfer(alice, bob, 30).map_err(|e| eprintln!("{}", e));
+	runtime.system.inc_nonce(&alice);
+	let _res = runtime.balances.transfer(&alice, &bob, 30).map_err(|e| eprintln!("{}", e));
 
 	// second transaction
-	runtime.system.inc_nonce(alice);
-	let _res = runtime.balances.transfer(alice, charlie, 20).map_err(|e| eprintln!("{}", e));
+	runtime.system.inc_nonce(&alice);
+	let _res = runtime.balances.transfer(&alice, &charlie, 20).map_err(|e| eprintln!("{}", e));
 
 	println!("runtime state: {:#?}", runtime);
 }
