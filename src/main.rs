@@ -103,19 +103,25 @@ fn main() {
 	runtime.balances.set_balance(&alice, 100);
 
 	// start emulating a block
-	runtime.system.inc_block_number();
-	assert_eq!(runtime.system.block_number(), 1, "Mismatch block number");
+	let first_block = types::Block {
+		header: support::Header { block_number: 1 },
+		extrinsics: vec![
+			// first transaction
+			support::Extrinsic {
+				caller: alice.clone(),
+				call: RuntimeCall::BalancesTransfer { to: bob.clone(), amount: 30 },
+			},
+			// second transaction
+			support::Extrinsic {
+				caller: alice.clone(),
+				call: RuntimeCall::BalancesTransfer { to: charlie, amount: 20 },
+			},
+		],
+	};
 
-	// first transaction
-	runtime.system.inc_nonce(&alice);
-	let _res = runtime
-		.balances
-		.transfer(alice.clone(), bob, 30)
-		.map_err(|e| eprintln!("{}", e));
+	runtime.execute_block(first_block).expect("Invalid block");
 
-	// second transaction
 	runtime.system.inc_nonce(&alice);
-	let _res = runtime.balances.transfer(alice, charlie, 20).map_err(|e| eprintln!("{}", e));
 
 	println!("runtime state: {:#?}", runtime);
 }
