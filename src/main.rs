@@ -22,7 +22,7 @@ mod types {
 // These are all the calls which are exposed to the world.
 // Note that it is just an accumulation of the calls exposed by each module.
 pub enum RuntimeCall {
-	// TODO: Not implemented yet.
+	BalancesTransfer { to: types::AccountId, amount: types::Balance },
 }
 
 // This is our main Runtime.
@@ -41,18 +41,6 @@ impl Runtime {
 
 	// Execute a block of extrinsics. Increments the block number.
 	fn execute_block(&mut self, block: types::Block) -> support::DispatchResult {
-		/* TODO:
-			- Increment the system's block number.
-			- Check that the block number of the incoming block matches the current block number,
-			  or return an error.
-			- Iterate over the extrinsics in the block...
-				- Increment the nonce of the caller.
-				- Dispatch the extrinsic using the `caller` and the `call` contained in the extrinsic.
-				- Handle errors from `dispatch` same as we did for individual calls: printing any
-				  error and capturing the result.
-				- You can extend the error message to include information like the block number and
-				  extrinsic number.
-		*/
 		self.system.inc_block_number();
 
 		if self.system.block_number() != block.header.block_number {
@@ -96,7 +84,12 @@ impl crate::support::Dispatch for Runtime {
 		caller: Self::Caller,
 		runtime_call: Self::Call,
 	) -> support::DispatchResult {
-		unimplemented!();
+		match runtime_call {
+			RuntimeCall::BalancesTransfer { to, amount } => {
+				self.balances.transfer(caller, to, amount)?;
+			},
+		}
+		Ok(())
 	}
 }
 
