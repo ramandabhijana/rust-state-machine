@@ -17,7 +17,7 @@ mod types {
 // It accumulates all of the different pallets we want to use.
 #[derive(Debug)]
 pub struct Runtime {
-	system: system::Pallet<types::AccountId, types::BlockNumber, types::Nonce>,
+	system: system::Pallet<Self>,
 	balances: balances::Pallet<types::AccountId, types::Balance>,
 }
 
@@ -26,6 +26,12 @@ impl Runtime {
 	fn new() -> Self {
 		Self { system: system::Pallet::new(), balances: balances::Pallet::new() }
 	}
+}
+
+impl system::Config for Runtime {
+	type AccountId = types::AccountId;
+	type BlockNumber = types::BlockNumber;
+	type Nonce = types::Nonce;
 }
 
 fn main() {
