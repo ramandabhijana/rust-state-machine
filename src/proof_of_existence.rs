@@ -44,13 +44,9 @@ impl<T: Config> Pallet<T> {
 	/// This function should only succeed if the caller is the owner of an existing claim.
 	/// It will return an error if the claim does not exist, or if the caller is not the owner.
 	pub fn revoke_claim(&mut self, caller: T::AccountId, claim: T::Content) -> DispatchResult {
-		match self.get_claim(&claim) {
-			Some(owner) => {
-				if *owner != caller {
-					return Err("Caller is not the owner");
-				}
-			},
-			None => return Err("claim does not exist"),
+		let owner = self.get_claim(&claim).ok_or("claim does not exist")?;
+		if *owner != caller {
+			return Err("Caller is not the owner");
 		}
 		self.claims.remove(&claim);
 		Ok(())
