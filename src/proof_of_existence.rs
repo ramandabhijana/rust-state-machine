@@ -69,12 +69,26 @@ mod test {
 
 	#[test]
 	fn basic_proof_of_existence() {
-		/*
-			TODO:
-			Create an end to end test verifying the basic functionality of this pallet.
-				- Check the initial state is as you expect.
-				- Check that all functions work successfully.
-				- Check that all error conditions error as expected.
-		*/
+		let mut proof_of_existence = super::Pallet::<TestConfig>::new();
+		assert!(proof_of_existence.get_claim(&"data").is_none());
+
+		assert!(proof_of_existence.create_claim("alice", "data").is_ok());
+		assert_eq!(proof_of_existence.get_claim(&"data"), Some(&"alice"));
+		assert!(proof_of_existence.revoke_claim("alice", "data").is_ok());
+
+		assert!(proof_of_existence.create_claim("bob", "document").is_ok());
+		assert_eq!(
+			proof_of_existence.create_claim("charlie", "document"),
+			Err("claim already exist")
+		);
+
+		assert_eq!(
+			proof_of_existence.revoke_claim("charlie", "document"),
+			Err("Caller is not the owner")
+		);
+		assert_eq!(
+			proof_of_existence.revoke_claim("charlie", "record"),
+			Err("claim does not exist")
+		);
 	}
 }
