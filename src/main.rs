@@ -137,7 +137,26 @@ fn main() {
 		],
 	};
 
+	let second_block = types::Block {
+		header: support::Header { block_number: 2 },
+		extrinsics: vec![
+			support::Extrinsic {
+				caller: alice.clone(),
+				call: RuntimeCall::ProofOfExistence(proof_of_existence::Call::CreateClaim(
+					"Some text",
+				)),
+			},
+			support::Extrinsic {
+				caller: bob.clone(),
+				call: RuntimeCall::ProofOfExistence(proof_of_existence::Call::CreateClaim(
+					"Some text longer",
+				)),
+			},
+		],
+	};
+
 	runtime.execute_block(first_block).expect("Invalid block");
+	runtime.execute_block(second_block).expect("Invalid block");
 
 	println!("runtime state: {:#?}", runtime);
 }
