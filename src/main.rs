@@ -1,6 +1,7 @@
 use crate::{support::Dispatch, types::AccountId};
 
 mod balances;
+mod proof_of_existence;
 mod support;
 mod system;
 
