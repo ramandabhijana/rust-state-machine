@@ -139,7 +139,5 @@ fn main() {
 
 	runtime.execute_block(first_block).expect("Invalid block");
 
-	runtime.system.inc_nonce(&alice);
-
 	println!("runtime state: {:#?}", runtime);
 }
