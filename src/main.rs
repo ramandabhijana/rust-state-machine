@@ -1,6 +1,7 @@
 use crate::{support::Dispatch, types::AccountId};
 
 mod balances;
+mod proof_of_existence;
 mod support;
 mod system;
 
@@ -17,12 +18,14 @@ mod types {
 	pub type Extrinsic = support::Extrinsic<AccountId, RuntimeCall>;
 	pub type Header = support::Header<BlockNumber>;
 	pub type Block = support::Block<Header, Extrinsic>;
+	pub type Content = &'static str;
 }
 
 // These are all the calls which are exposed to the world.
 // Note that it is just an accumulation of the calls exposed by each module.
 pub enum RuntimeCall {
 	Balances(balances::Call<Runtime>),
+	ProofOfExistence(proof_of_existence::Call<Runtime>),
 }
 
 // This is our main Runtime.
@@ -31,12 +34,17 @@ pub enum RuntimeCall {
 pub struct Runtime {
 	system: system::Pallet<Self>,
 	balances: balances::Pallet<Self>,
+	proof_of_existence: proof_of_existence::Pallet<Self>,
 }
 
 impl Runtime {
 	// Create a new instance of the main Runtime, by creating a new instance of each pallet.
 	fn new() -> Self {
-		Self { system: system::Pallet::new(), balances: balances::Pallet::new() }
+		Self {
+			system: system::Pallet::new(),
+			balances: balances::Pallet::new(),
+			proof_of_existence: proof_of_existence::Pallet::new(),
+		}
 	}
 
 	// Execute a block of extrinsics. Increments the block number.
@@ -71,6 +79,10 @@ impl balances::Config for Runtime {
 	type Balance = types::Balance;
 }
 
+impl proof_of_existence::Config for Runtime {
+	type Content = types::Content;
+}
+
 impl crate::support::Dispatch for Runtime {
 	type Caller = <Runtime as system::Config>::AccountId;
 	type Call = RuntimeCall;
@@ -87,6 +99,9 @@ impl crate::support::Dispatch for Runtime {
 		match runtime_call {
 			RuntimeCall::Balances(call) => {
 				self.balances.dispatch(caller, call)?;
+			},
+			RuntimeCall::ProofOfExistence(call) => {
+				self.proof_of_existence.dispatch(caller, call)?;
 			},
 		}
 		Ok(())
@@ -122,9 +137,26 @@ fn main() {
 		],
 	};
 
-	runtime.execute_block(first_block).expect("Invalid block");
+	let second_block = types::Block {
+		header: support::Header { block_number: 2 },
+		extrinsics: vec![
+			support::Extrinsic {
+				caller: alice.clone(),
+				call: RuntimeCall::ProofOfExistence(proof_of_existence::Call::CreateClaim(
+					"Some text",
+				)),
+			},
+			support::Extrinsic {
+				caller: bob.clone(),
+				call: RuntimeCall::ProofOfExistence(proof_of_existence::Call::CreateClaim(
+					"Some text longer",
+				)),
+			},
+		],
+	};
 
-	runtime.system.inc_nonce(&alice);
+	runtime.execute_block(first_block).expect("Invalid block");
+	runtime.execute_block(second_block).expect("Invalid block");
 
 	println!("runtime state: {:#?}", runtime);
 }
